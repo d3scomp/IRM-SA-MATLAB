@@ -1,20 +1,20 @@
 classdef FireFighterMoveProcess < Process
-    
-    properties (SetAccess = protected)
-        
-        Map;
-        DestinationX;
-        DestinationY;
-        
+    % FireFighterMoveProcess class represents a process, that ensures the movement
+	% of a FireFighter component. This class extends the Process abstract class.
+	
+    properties (SetAccess = protected)    
+        Map; % A matrix representing the area of movement (heat map).
+        DestinationX; % The X coordinate where the component needs to move.
+        DestinationY; % The Y coordinate where the component needs to move.
     end
     
     methods
-       
-        % Constructor
         function obj = FireFighterMoveProcess(component, period, map, ...
                 destination)
-            % Invoke the constructor of the superclass
-            obj@Process(component, period);
+		% Construct a FireFighterMoveProcess instance.
+		% The instance will associate the given component and map.
+		% The given destination [x, y] and period will be stored in the process.
+            obj@Process(component, period); % Invoke the constructor of the superclass
             
             obj.Map = map;
             obj.DestinationX = destination(1);
@@ -22,10 +22,11 @@ classdef FireFighterMoveProcess < Process
         end 
         
         function obj = execute(obj)
-%            fprintf('M');
-            % Disable the process if the destinaiton position is reached
+		% EXECUTE when called moves the component one step closer (in both coordinates)
+		% to the destination.
             if(obj.DestinationX == obj.Component.PositionX && ...
                     obj.DestinationY == obj.Component.PositionY)
+				% Disable the process if the destination position is reached
                 obj.NextOccurrence = -1;
             else
                 if(obj.Component.PositionX < obj.DestinationX)
@@ -40,10 +41,7 @@ classdef FireFighterMoveProcess < Process
                         obj.Component.FutureY = obj.Component.PositionY - 1;
                     end
                 end
-                    
             end
-            
         end
-        
     end
 end

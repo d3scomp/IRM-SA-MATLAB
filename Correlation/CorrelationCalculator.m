@@ -1,13 +1,18 @@
 classdef CorrelationCalculator
     
     properties(Access = private, Constant = true)
-        Treshold = 0.9; % The treshold of the correlation level.
         SegmentLength = 50; % The number of elements in each segment that is used for the correlation computation.
     end
     
     methods(Static = true)
-        
         function correlations = segmentCorrelations(v1, v2)
+		% SEGMENTCORRELATIONS computes the correlation between the given
+		% vectors segment by segment.
+		%    correlations = SEGMENTCORRELATIONS(v1, v2) computes the correlation
+		%    between v1 and v2 segment by segment. The length of a segment is
+		%    given by CorrelationCalculator.SegmentLength. The return value
+		%    of this function is a vector containing the correlation values of
+		%    the segments of the given vectors.
             [ev1, ev2] = CorrelationCalculator.ensureCompatibility(v1, v2);
             length = size(ev1, 2);
             stepCnt = ceil((size(ev1, 2)-1)/CorrelationCalculator.SegmentLength);
@@ -20,11 +25,12 @@ classdef CorrelationCalculator
                 correlations(step) = CorrelationCalculator.correlation(ev1, ev2, begin, finish);
                 step = step + 1;
             end
+			% If the original vector is not divisible by the segment size,
+			% the last (incomplete) segment needs to be computed separately.
             if (step-1) * CorrelationCalculator.SegmentLength < length - 1
                 begin = (step-1) * CorrelationCalculator.SegmentLength + 1;
                 correlations(step) = CorrelationCalculator.correlation(ev1, ev2, begin, length);
             end
-            
         end
         
         function value = correlation(varargin)
@@ -35,8 +41,7 @@ classdef CorrelationCalculator
         %    value = CORRELATION(v1, v2, begin, end) computes the
         %    correlation between v1 and v2 on the values starting at
         %    'begin' and ending at 'finish'.
-            
-            switch(nargin)
+            switch(nargin) % Parse the arguments
                 case 2
                     begin = 1;
                     finish = size(varargin{1}, 2);
@@ -57,7 +62,6 @@ classdef CorrelationCalculator
             end
             
             [ev1, ev2] = CorrelationCalculator.ensureCompatibility(varargin{1}, varargin{2});
-            
             if(size(ev1, 2) ~= size(ev2, 2))
                 error('CorrelationCalculator.correlation correlation calculation requires the vectors to be the same length.');
             end
@@ -82,7 +86,6 @@ classdef CorrelationCalculator
         % ENSURECOMPATIBILITY if the given vectors doesn't have the same
         % length this function will pick values from the longer vector
         % evenly and returns the vectors with the same length.
-        
             length1 = size(in1, 2);
             length2 = size(in2, 2);
         
@@ -125,8 +128,8 @@ classdef CorrelationCalculator
                 v2 = shorter;
             end
         end
-        
     end
+	
 end
 
 

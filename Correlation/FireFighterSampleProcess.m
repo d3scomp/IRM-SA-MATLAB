@@ -1,19 +1,19 @@
 classdef FireFighterSampleProcess < Process
-    
+    % FireFighterSampleProcess class represents a process, that ensures the sampling
+	% of a FireFighter component's sensors. This class extends the Process abstract class.
+	
     properties (SetAccess = protected)
-        
-        Map;
-        OxygenConsumption;
-        BatteryConsumption;
-        
+        Map; % A matrix representing the area of movement (heat map).
+        OxygenConsumption; % The amount of oxygen that is consumed at each sample time.
+        BatteryConsumption; % The amount of energy that is consumed at each sample time.
     end
     
     methods
-       
-        % Constructor
         function obj = FireFighterSampleProcess(component, period, map)
-            % Invoke the constructor of the superclass
-            obj@Process(component, period);
+        % Constructs an instance of the FireFighterSampleProcess class.
+		% The instance will associate the given component and map.
+		% The given period will be stored in the process.
+            obj@Process(component, period); % Invoke the constructor of the superclass
             
             obj.Map = map;
             obj.OxygenConsumption = 0.002;
@@ -21,7 +21,7 @@ classdef FireFighterSampleProcess < Process
         end
         
         function obj = execute(obj)
-%            fprintf('S');
+		% EXECUTE when called samples the component and adjusts its state.
             obj.Component.BatteryLevel = ...
                 obj.Component.BatteryLevel ...
                 - obj.BatteryConsumption;
