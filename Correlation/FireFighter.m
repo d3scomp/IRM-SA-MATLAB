@@ -34,10 +34,10 @@ classdef FireFighter < Component
             obj.OxygenNoise = RandomNoise(1);
             obj.BatteryNoise = RandomNoise(2);
             
-            obj.FutureX = 200; % The value of the FutureX and PositionX has to be initially the same.
-            obj.FutureY = 250; % The value of the FutureY and PositionY has to be initially the same.
-            obj.PositionX = 200;
-            obj.PositionY = 250;
+            obj.FutureX = 300; % The value of the FutureX and PositionX has to be initially the same.
+            obj.FutureY = 300; % The value of the FutureY and PositionY has to be initially the same.
+            obj.PositionX = 300;
+            obj.PositionY = 300;
             obj.OxygenLevel = 100;
             obj.BatteryLevel = 100;
             

@@ -49,13 +49,13 @@ classdef FireFighterGroupRandomMoveProcess < Process
                 obj.Component.FutureX = obj.Component.PositionX + 2;
             end
             if obj.Component.PositionX > centroidX + obj.GroupBound
-                obj.Component.PositionX = obj.Component.PositionX - 2;
+                obj.Component.FutureX = obj.Component.PositionX - 2;
             end
             if obj.Component.PositionY < centroidY - obj.GroupBound
                 obj.Component.FutureY = obj.Component.PositionY + 2;
             end
             if obj.Component.PositionY > centroidY + obj.GroupBound
-                obj.Component.PositionY = obj.Component.PositionY - 2;
+                obj.Component.FutureY = obj.Component.PositionY - 2;
             end
         
             switch floor(rand*3) % make three possible cases (0, 1, 2)

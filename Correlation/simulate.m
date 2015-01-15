@@ -8,7 +8,7 @@ function simulate
     randomMovement = true; % Switch between random and predefined movement.
     animate = true; % Indicates whether the simulation will be animated.
     plotSimData = true; % Indicates whether the data from the simulation will be plotted.
-    maxSteps = 20000; % The number of steps in the simulation. After the given number of steps the simulation ends.
+    maxSteps = 50000; % The number of steps in the simulation. After the given number of steps the simulation ends.
     
     % Configure the simulation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
@@ -27,6 +27,7 @@ function simulate
     calendar = EventCalendar();
     
     moveProcessPeriod = 1;
+    sampleProcessPeriod = 0.5;
         
     if ~randomMovement % Predefined movement simulation %%%%%%%%%%%%%%%%%%%%%%%
         % Create destination points for the firefighters
@@ -95,22 +96,22 @@ function simulate
     % Sample processes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     % The sample process for the firefighter f1
-    f1Sample = FireFighterSampleProcess(f1, 0.1, map);
+    f1Sample = FireFighterSampleProcess(f1, sampleProcessPeriod, map);
     f1SampleEvent = Event(f1Sample, 0);
     calendar.insert(f1SampleEvent);
     
 	% The sample process for the firefighter f2
-    f2Sample = FireFighterSampleProcess(f2, 0.1, map);
+    f2Sample = FireFighterSampleProcess(f2, sampleProcessPeriod, map);
     f2SampleEvent = Event(f2Sample, 0);
     calendar.insert(f2SampleEvent);
     
 	% The sample process for the firefighter f3
-    f3Sample = FireFighterSampleProcess(f3, 0.1, map);
+    f3Sample = FireFighterSampleProcess(f3, sampleProcessPeriod, map);
     f3SampleEvent = Event(f3Sample, 0);
     calendar.insert(f3SampleEvent);
     
 	% The sample process for the firefighter f4
-    f4Sample = FireFighterSampleProcess(f4, 0.1, map);
+    f4Sample = FireFighterSampleProcess(f4, sampleProcessPeriod, map);
     f4SampleEvent = Event(f4Sample, 0);
     calendar.insert(f4SampleEvent);
 
