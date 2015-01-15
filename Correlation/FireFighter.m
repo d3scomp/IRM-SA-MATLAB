@@ -22,7 +22,7 @@ classdef FireFighter < Component
     end
     
     methods
-        function obj = FireFighter(name)
+        function obj = FireFighter(name, positionX, positionY)
             % Constructs new instance of the FireFighter class. Sets the
             % starting position, oxygen level and battery level to the
             % object. Initializes all the noise filters with a predefined
@@ -34,10 +34,10 @@ classdef FireFighter < Component
             obj.OxygenNoise = RandomNoise(1);
             obj.BatteryNoise = RandomNoise(2);
             
-            obj.FutureX = 300; % The value of the FutureX and PositionX has to be initially the same.
-            obj.FutureY = 300; % The value of the FutureY and PositionY has to be initially the same.
-            obj.PositionX = 300;
-            obj.PositionY = 300;
+            obj.FutureX = positionX; % The value of the FutureX and PositionX has to be initially the same.
+            obj.FutureY = positionY; % The value of the FutureY and PositionY has to be initially the same.
+            obj.PositionX = positionX;
+            obj.PositionY = positionY;
             obj.OxygenLevel = 100;
             obj.BatteryLevel = 100;
             

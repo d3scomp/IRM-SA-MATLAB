@@ -8,17 +8,19 @@ function simulate()
     randomMovement = true; % Switch between random and predefined movement.
     animate = true; % Indicates whether the simulation will be animated.
     plotSimData = true; % Indicates whether the data from the simulation will be plotted.
-    maxSteps = 100000; % The number of steps in the simulation. After the given number of steps the simulation ends.
+    maxSteps = 10000; % The number of steps in the simulation. After the given number of steps the simulation ends.
     
     % Configure the simulation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     rng(12345); % Seed the random number generator
     
 	% Create the firefighter components
-    f1 = FireFighter('f1');
-    f2 = FireFighter('f2');
-    f3 = FireFighter('f3');
-    f4 = FireFighter('f4');
+    startX = 300;
+    startY = 300;
+    f1 = FireFighter('f1', startX, startY);
+    f2 = FireFighter('f2', startX, startY);
+    f3 = FireFighter('f3', startX, startY);
+    f4 = FireFighter('f4', startX, startY);
     
 	% Generate heat map
     map = generateHeatMap();
