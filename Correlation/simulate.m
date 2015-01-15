@@ -1,4 +1,4 @@
-function simulate
+function simulate()
 % SIMULATE runs the simulation of firefighters moving on the heat map.
 % At first there is a heat map being generated. Than there are created 4 firefighter
 % components and theirs processes. There are planned movements of these components.
@@ -8,7 +8,7 @@ function simulate
     randomMovement = true; % Switch between random and predefined movement.
     animate = true; % Indicates whether the simulation will be animated.
     plotSimData = true; % Indicates whether the data from the simulation will be plotted.
-    maxSteps = 50000; % The number of steps in the simulation. After the given number of steps the simulation ends.
+    maxSteps = 100000; % The number of steps in the simulation. After the given number of steps the simulation ends.
     
     % Configure the simulation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     

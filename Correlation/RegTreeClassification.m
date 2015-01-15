@@ -9,7 +9,7 @@ classdef RegTreeClassification
     end
     
     properties (Constant)
-        plotClasses = false; % Indicates whether the classes of data will be plotted.
+        plotClasses = true; % Indicates whether the classes of data will be plotted.
     end
     
     methods
