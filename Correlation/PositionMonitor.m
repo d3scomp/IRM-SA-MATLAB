@@ -42,5 +42,20 @@ classdef PositionMonitor < ProximityMonitor
             value = sqrt((x1(sampleIndex) - x2(sampleIndex))^2 ...
                           + (y1(sampleIndex) - y2(sampleIndex))^2);     
         end
+        
+        function distances = distances(obj, component1, component2)
+        % DISTANCES compute the distances between corresponding positions of component1
+		% and component2. The position of a component is stored in data vectors
+        % labeled by PositionMonitor.CoordinateX and PositionMonitor.CoordinateY.
+        % The metric of the distance is euclidean distance.
+            x1 = component1.getDataFieldHistory(obj.CoordinateX);
+            x2 = component2.getDataFieldHistory(obj.CoordinateX);
+            y1 = component1.getDataFieldHistory(obj.CoordinateY);
+            y2 = component2.getDataFieldHistory(obj.CoordinateY);
+            dataLength = obj.dataBounds(component1, component2);
+            
+            distances = sqrt((x1(1:dataLength) - x2(1:dataLength)).^2 ...
+                             + (y1(1:dataLength) - y2(1:dataLength)).^2);
+        end
     end
 end

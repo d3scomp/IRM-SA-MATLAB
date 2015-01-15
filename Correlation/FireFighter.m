@@ -29,15 +29,15 @@ classdef FireFighter < Component
             % noise level.
             obj = obj@Component(name); % Invoke the constructor of the super class
             
-            obj.PositionNoise = RandomNoise(5);
-            obj.TemperatureNoise = RandomNoise(5);
+            obj.PositionNoise = RandomNoise(2);
+            obj.TemperatureNoise = RandomNoise(3);
             obj.OxygenNoise = RandomNoise(1);
             obj.BatteryNoise = RandomNoise(2);
             
-            obj.FutureX = 1; % The value of the FutureX and PositionX has to be initially the same.
-            obj.FutureY = 350; % The value of the FutureY and PositionY has to be initially the same.
-            obj.PositionX = 1;
-            obj.PositionY = 350;
+            obj.FutureX = 200; % The value of the FutureX and PositionX has to be initially the same.
+            obj.FutureY = 250; % The value of the FutureY and PositionY has to be initially the same.
+            obj.PositionX = 200;
+            obj.PositionY = 250;
             obj.OxygenLevel = 100;
             obj.BatteryLevel = 100;
             

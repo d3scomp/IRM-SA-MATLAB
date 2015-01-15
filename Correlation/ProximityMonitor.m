@@ -1,4 +1,4 @@
-classdef (Abstract = true) ProximityMonitor
+classdef (Abstract = true) ProximityMonitor < matlab.mixin.Heterogeneous
 	% ProximityMonitor class is an abstract class that represents a calculator
 	% that can indicate for two data values whether they are "close" or "far"
 	% based on the specified boundary. The ProximityMonitor class needs to be
@@ -15,6 +15,20 @@ classdef (Abstract = true) ProximityMonitor
 		% and boundary to the instance.
             obj.Label = label;
             obj.Boundary = boundary;
+        end
+        
+        function classification = classify(obj, component1, component2)
+        % CLASSIFY classifies the distances "close" and "far". The classification
+        % consideres the distances of ProximityMonitor.Label in component1
+        % and component2. The classification values are "close" (1) and "far" (0)
+        % and they respect the ProximityMonitor.Boundary value.
+            dataLength = obj.dataBounds(component1, component2);
+            classification = zeros(1, dataLength);
+            for i = 1:dataLength
+                if obj.wasClose(component1, component2, i)
+                    classification(i) = 1;
+                end
+            end
         end
         
         function [closePercentage, farPercentage, closeMean, closeStd, farMean, farStd] = ...
@@ -134,6 +148,13 @@ classdef (Abstract = true) ProximityMonitor
             inBounds = (sampleIndex <= size(component1.getDataFieldHistory(obj.Label),2) ...
                     && sampleIndex <= size(component2.getDataFieldHistory(obj.Label),2)); 
         end
+        
+        function dataBounds = dataBounds(obj, component1, component2)
+        % DATABOUNDS returns the minimal length of the data vector specified by
+        % the ProximityMonitor.Label in the component1 and component2.
+            dataBounds = min(size(component1.getDataFieldHistory(obj.Label),2), ...
+                             size(component2.getDataFieldHistory(obj.Label),2));
+        end
     end
     
     methods (Access = protected, Static = true)
@@ -221,5 +242,6 @@ classdef (Abstract = true) ProximityMonitor
     methods (Abstract = true)
         wasClose = wasClose(obj, component1, component2, sampleIndex); % Indicate whether the values at sampleIndex in the data vectors denoted by the ProximityMonitor in component1 and component2 are "close".
         value = getDistance(obj, component1, component2, sampleIndex); % Computes the distance of the data values at sampleIndex in the data vectors denoted by the ProximityMonitor in component1 and component2.
+        distances = distances(obj, component1, component2); % Computes the distances between corresponding data values
     end
 end

@@ -1,29 +1,29 @@
-classdef TemperatureMonitor < ProximityMonitor
-	% TemperatureMonitor class extends the ProximityMonitor class and represents
+classdef OxygenMonitor < ProximityMonitor
+	% OxygenMonitor class extends the ProximityMonitor class and represents
 	% a calculator that can indicate for two data values whether they are "close"
-	% or "far" based on the specified boundary. The TemperatureMonitor class
-	% defines a metric for the temperature data values.
+	% or "far" based on the specified boundary. The OxygenMonitor class
+	% defines a metric for the oxygenLevel data values.
    
     methods
-        function obj = TemperatureMonitor(boundary)
-		% Constructs an instance of the TemperatureMonitor class.
+        function obj = OxygenMonitor(boundary)
+		% Constructs an instance of the OxygenMonitor class.
 		% The given boundary will delimit the notion of "close" and "far" for
 		% the instance.
-            obj = obj@ProximityMonitor('temperature', boundary);
+            obj = obj@ProximityMonitor('oxygenLevel', boundary);
         end
         
         function wasClose = wasClose(obj, component1, component2, sampleIndex)
         % WASCLOSE indicates whether the data values in the component1 and component2
-		% that are stored in vector labeled by TemperatureMonitor.Label
+		% that are stored in vector labeled by OxygenMonitor.Label
 		% at the index sampleIndex are "close" (true) or "far" (false) based
-		% on the specified TemperatureMonitor.Boundary value.
+		% on the specified OxygenMonitor.Boundary value.
             wasClose = (obj.getDistance(component1, component2, sampleIndex) <= obj.Boundary);
         end
         
         function value = getDistance(obj, component1, component2, sampleIndex)
-        % GETDISTANCE compute the distance between the temperature of component1
+        % GETDISTANCE compute the distance between the oxygen level of component1
 		% and component2 at the time given by sampleIndex. The value of the
-		% component is stored in data vector labeled by TemperatureMonitor.Label.
+		% component is stored in data vector labeled by OxygenMonitor.Label.
 		% The metric of the distance is a difference of the values.
             t1 = component1.getDataFieldHistory(obj.Label);
             t2 = component2.getDataFieldHistory(obj.Label);
@@ -32,9 +32,9 @@ classdef TemperatureMonitor < ProximityMonitor
         end
         
         function distances = distances(obj, component1, component2)
-        % DISTANCES compute the distances between corresponding temperatures
+        % DISTANCES compute the distances between corresponding oxygen levels
 		% of component1 and component2. The value of the component is stored
-        % in data vector labeled by TemperatureMonitor.Label
+        % in data vector labeled by OxygenMonitor.Label
 		% The metric of the distance is a difference of the values.
             t1 = component1.getDataFieldHistory(obj.Label);
             t2 = component2.getDataFieldHistory(obj.Label);

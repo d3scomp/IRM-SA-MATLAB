@@ -32,7 +32,7 @@ classdef EventCalendar < handle
             obj.Events(minIndex) = [];
         end
         
-        function executeNext(obj)
+        function repeated = executeNext(obj)
 		% EXECUTENEXT executes the next (earliest) event in the calendar and removes it
 		% from the calendar. If the event is periodical (or needs to be executed
 		% again) it will be planned into the calendar for the time defined
@@ -49,6 +49,9 @@ classdef EventCalendar < handle
             % Plan the event again if required
             if(nextEvent.EventTime ~= -1)
                 obj.insert(nextEvent);
+                repeated = true;
+            else
+                repeated = false;
             end
         end
         

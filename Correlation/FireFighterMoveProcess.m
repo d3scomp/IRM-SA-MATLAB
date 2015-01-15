@@ -28,6 +28,8 @@ classdef FireFighterMoveProcess < Process
                     obj.DestinationY == obj.Component.PositionY)
 				% Disable the process if the destination position is reached
                 obj.NextOccurrence = -1;
+                fprintf('\n%s position [%d,%d] reached\n', obj.Component.Name, ...
+                    obj.DestinationX, obj.DestinationY);
             else
                 if(obj.Component.PositionX < obj.DestinationX)
                     obj.Component.FutureX = obj.Component.PositionX + 1;

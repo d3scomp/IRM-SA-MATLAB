@@ -53,5 +53,15 @@ classdef (Abstract = true) Component < handle
                 history = [];
             end
         end
+        
+        function minLength = getMinDataFieldLength(obj)
+            % GETMINDATAFIELDLENGTH returns the length of the shortest data
+            % field history vector.
+            minLength = intmax;
+            labels = obj.getDataFieldLabels();
+            for label = labels
+                minLength = min(minLength, size(obj.DataFields(label{1}), 2));
+            end
+        end
     end
 end
