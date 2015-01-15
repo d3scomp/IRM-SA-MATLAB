@@ -1,11 +1,10 @@
-classdef KNNClassification
-    %KNNCLASSIFICATION defines methods for data classification based on the
-    %k-nearest neighbors method.
+classdef RegTreeClassification
+    %REGTREECLASSIFICATION defines methods for data classification based on the
+    %regression tree method.
     %   An instance of this class needs to learn on some data sample at
     %   first. Then it provides methods for classification of given data.
     
     properties
-        NeighborCnt; % The number of neighbors used for the classification.
         TrainPercentage; % The percentage of data that will be used for the training. The rest will be used for testing.
     end
     
@@ -14,12 +13,11 @@ classdef KNNClassification
     end
     
     methods
-        function obj = KNNClassification(k)
-        % KNNCLASSIFICATION constructs an instance of the class and
-        % associates the given neighbors count with it. There is also
-        % defined the percentage of data that is used for training the
-        % model. The rest of the data will be used to test the model.
-            obj.NeighborCnt = k;
+        function obj = RegTreeClassification()
+        % REGTREECLASSIFICATION constructs an instance of the class.
+        % There is also defined the percentage of data that is used
+        % for training the model. The rest of the data will be used
+        % to test the model.
             obj.TrainPercentage = 0.5;
         end
         
@@ -36,7 +34,7 @@ classdef KNNClassification
         %    d) All the distances measured by the given monitors are used
         %       as the input training data
         %    e) The targetMonitor is used to classify the data "close"/"far"
-        %  2) The model is trained on KNNClassification.TrainPercentage
+        %  2) The model is trained on RegTreeClassification.TrainPercentage
         %     of the data 
         %  3) The rest of the data is used for testing the prediction
         %  4) The success rate of the prediction test is returned
@@ -52,7 +50,7 @@ classdef KNNClassification
             trainEnd = intmax;
             testEnd = intmax;
             
-            fprintf('Classifying using %d-nearist neighbors method ...\n', obj.NeighborCnt);
+            fprintf('Classifying using regression tree method ...\n');
             
             % Find the shortest data vector among all the data vectors in the components and remember its length 
             for i = 1:componentsCnt
@@ -110,12 +108,12 @@ classdef KNNClassification
                 fprintf('Train data dimensions (hits): [%d:%d]\n', size(trainDataHits, 1), size(trainDataHits, 2));
                 fprintf('Train data dimensions (misses): [%d:%d]\n', size(trainDataMisses, 1), size(trainDataMisses, 2));
                 % Plot the class distribution depending on the first two attributes
-                figure('Name', sprintf('%d-Nearest Neighbors', obj.NeighborCnt));
+                figure('Name', 'Regression Tree');
                 hold on;
                 title('Train');
                 plot(trainDataHits(1,:), trainDataHits(2,:), 'rx', trainDataMisses(1,:), trainDataMisses(2,:), 'bo');
                 hold off;
-                figure('Name', sprintf('%d-Nearest Neighbors', obj.NeighborCnt));
+                figure('Name', 'Regression Tree');
                 hold on;
                 title('Test');
                 plot(testDataHits(1,:), testDataHits(2,:), 'rx', testDataMisses(1,:), testDataMisses(2,:), 'bo');
@@ -124,9 +122,9 @@ classdef KNNClassification
 %                scatter3(trainDataHits(1,:), trainDataHits(2,:), trainDataHits(3,:));
 %                scatter3(trainDataMisses(1,:), trainDataMisses(2,:), trainDataMisses(3,:));
             end
-            
+
             % Train the model
-            mdl = fitcknn(transpose(trainData), trainCls, 'NumNeighbors', obj.NeighborCnt);
+            mdl = fitrtree(transpose(trainData), trainCls);
             
             % Test data prediction
             predictedCls = predict(mdl, transpose(testData));

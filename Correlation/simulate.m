@@ -168,6 +168,36 @@ function simulate
 %    calculateCorrelation(f);
 %    calculateProximityDependency(f);
     calculateKNNSuccessRate(f);
+    calculateRegTreeSuccessRate(f);
+end
+
+function calculateRegTreeSuccessRate(components)
+% CALCULATEREGTREESUCCESSRATE tests the classification using regression
+% tree method. There are created monitors for attributes used as the
+% input for the classification model and a monitor for the attribute that
+% is classified. The model is trained on a portion of data from the
+% simulation and than tested on the rest of the data. The rate of the
+% classification success of the model is printed.
+    targetMonitor = TemperatureMonitor(20);
+    monitors = [PositionMonitor(5) OxygenMonitor(1) BatteryMonitor(1)];
+    regTree = RegTreeClassification();
+    
+    regTreeSuccessRate = regTree.learnAndTest(components, monitors, targetMonitor);
+    printRegTreeSuccessRate(regTreeSuccessRate, targetMonitor, monitors);
+end
+
+function printRegTreeSuccessRate(successRate, targetMonitor, monitors)
+% PRINTREGTREESUCCESSRATE prints the result of the classification that used the
+% regression tree method.
+%  successRate - represents the success rate of the classicication test.
+%  targetMonitor - is the monitor of the classified attribute.
+%  monitors - is an array of monitors of the attributes used for the prediction.
+    fprintf('Regression tree classification for %s\n', targetMonitor.Label);
+    fprintf('\tdepending on:\n');
+    for monitor = monitors
+        fprintf('\t\t%s\n', monitor.Label);
+    end
+    fprintf('\tSuccess rate: %0.3f\n', successRate);
 end
 
 function calculateKNNSuccessRate(components)
@@ -195,7 +225,7 @@ function calculateKNNSuccessRate(components)
 end
 
 function printKNNSuccessRate(successRate, targetMonitor, monitors, neighborCnt)
-% PRINTKNNSUCCESSRATE print the result of the classification that used the
+% PRINTKNNSUCCESSRATE prints the result of the classification that used the
 % k-nearest neighbors method.
 %  successRate - represents the success rate of the classicication test.
 %  targetMonitor - is the monitor of the classified attribute.
