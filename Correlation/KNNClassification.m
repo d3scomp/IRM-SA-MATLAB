@@ -5,21 +5,19 @@ classdef KNNClassification
     %   first. Then it provides methods for classification of given data.
     
     properties
-        NeighborCnt; % The number of neighbors used for the classification.
         TrainPercentage; % The percentage of data that will be used for the training. The rest will be used for testing.
     end
     
     methods
-        function obj = KNNClassification(k)
-        % KNNCLASSIFICATION constructs an instance of the class and
-        % associates the given neighbors count with it. There is also
-        % defined the percentage of data that is used for training the
-        % model. The rest of the data will be used to test the model.
-            obj.NeighborCnt = k;
+        function obj = KNNClassification()
+        % KNNCLASSIFICATION constructs an instance of the class.
+        % There is also defined the percentage of data that is used
+        % for training the model.
+        % The rest of the data will be used to test the model.
             obj.TrainPercentage = 0.5;
         end
         
-        function successRate = learnAndTest(obj, data, classes)
+        function successRate = learnAndTest(obj, data, classes, neighborCnt)
         % LEARNANDTEST trains the model for the classification.
         % The k-nearest neighbor model is trained on a portion of the given
         % data with corresponding classes. The portion is defined by
@@ -33,10 +31,10 @@ classdef KNNClassification
             trainCls = classes(1:trainEnd);
             testCls = classes(trainEnd:testEnd);
             
-            fprintf('Classifying using %d-nearist neighbors method ...\n', obj.NeighborCnt);
+            fprintf('Classifying using %d-nearist neighbors method ...\n', neighborCnt);
             
             % Train the model
-            mdl = fitcknn(trainData, trainCls, 'NumNeighbors', obj.NeighborCnt);
+            mdl = fitcknn(trainData, trainCls, 'NumNeighbors', neighborCnt);
             
             % Test data prediction
             predictedCls = predict(mdl, testData);

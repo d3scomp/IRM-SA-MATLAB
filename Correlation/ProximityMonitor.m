@@ -5,7 +5,7 @@ classdef (Abstract = true) ProximityMonitor < matlab.mixin.Heterogeneous
 	% extended in order to define a metric for specific values.
 	
     properties (Constant)
-        plotClasses = true; % Indicates whether the classes of data will be plotted.
+        plotClasses = false; % Indicates whether the classes of data will be plotted.
     end
     
     properties (SetAccess = protected)

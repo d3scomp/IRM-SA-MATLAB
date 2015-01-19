@@ -6,17 +6,17 @@ function simulate() % TODO: varargin pairs name-value specifying the simulation 
 % events and the simulation runs until maximum of simulation steps is reached.
 
     randomMovement = true; % Switch between random and predefined movement.
-    animate = true; % Indicates whether the simulation will be animated.
-    plotSimData = true; % Indicates whether the data from the simulation will be plotted.
-    maxSteps = 100000; % The number of steps in the simulation. After the given number of steps the simulation ends.
+    animate = false; % Indicates whether the simulation will be animated.
+    plotSimData = false; % Indicates whether the data from the simulation will be plotted.
+    maxSteps = 1000000; % The number of steps in the simulation. After the given number of steps the simulation ends.
     
     % Configure the simulation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     rng(12345); % Seed the random number generator
     
 	% Create the firefighter components
-    startX = 300;
-    startY = 300;
+    startX = 256;
+    startY = 256;
     f1 = FireFighter('f1', startX, startY);
     f2 = FireFighter('f2', startX, startY);
     f3 = FireFighter('f3', startX, startY);
@@ -67,8 +67,8 @@ function simulate() % TODO: varargin pairs name-value specifying the simulation 
         calendar.insert(f4MoveEvent);
     else % Random movement simulation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
-        xBound = 100;
-        yBound = 100;
+        xBound = 250;
+        yBound = 250;
         g1Bound = 3;
         g2Bound = g1Bound - 1;
         
@@ -168,21 +168,29 @@ function simulate() % TODO: varargin pairs name-value specifying the simulation 
     end
     
     % Evaluate
-    [monitor, monitors, data, classes] = prepareTestData(f);
+    [data, dLabels, classes, clsLabel] = prepareTestData(f);
 %    calculateCorrelation(f);
 %    calculateProximityDependency(f);
-    calculateKNNSuccessRate(monitor, monitors, data, classes);
-    calculateRegTreeSuccessRate(monitor, monitors, data, classes);
+    calculateKNNSuccessRate(20, data, dLabels, classes, clsLabel);
+    calculateRegTreeSuccessRate(data, dLabels, classes, clsLabel);
 end
 
-function [targetMonitor, monitors, data, classes] = prepareTestData(components)
+function [data, dLabels, classes, clsLabel] = prepareTestData(components)
+% Calculate differences of the data from components using apropriate
+% monitors. Classify the desired data using an appropriate monitor.
+% The distances are calculated using PositionMonitor, OxygenMonitor and
+% BatteryMonitor. The classification is done using TemperatureMonitor.
+% The calculated data are stored into a file for a later usage.
     targetMonitor = TemperatureMonitor(20);
     monitors = [PositionMonitor(5) OxygenMonitor(1) BatteryMonitor(1)];
+    dLabels = {'position', 'oxygen', 'battery'};
+    clsLabel = 'temperature';
     
     [data, classes] = targetMonitor.learningData(components, monitors);
+    saveData(data, dLabels, classes, clsLabel);
 end
 
-function calculateRegTreeSuccessRate(monitor, monitors, data, classes)
+function calculateRegTreeSuccessRate(data, dLabels, classes, clsLabel)
 % CALCULATEREGTREESUCCESSRATE tests the classification using regression
 % tree method. There are created monitors for attributes used as the
 % input for the classification model and a monitor for the attribute that
@@ -192,44 +200,41 @@ function calculateRegTreeSuccessRate(monitor, monitors, data, classes)
     regTree = RegTreeClassification();
     
     regTreeSuccessRate = regTree.learnAndTest(data, classes);
-    fprintf('Regression tree classification for %s\n', monitor.Label);
-    printSuccessRate(regTreeSuccessRate, monitors);
+    fprintf('Regression tree classification for %s\n', clsLabel);
+    printSuccessRate(regTreeSuccessRate, dLabels);
 end
 
-function printSuccessRate(successRate, monitors)
-% PRINTREGTREESUCCESSRATE prints the result of the classification that used the
-% regression tree method.
-%  successRate - represents the success rate of the classicication test.
-%  targetMonitor - is the monitor of the classified attribute.
-%  monitors - is an array of monitors of the attributes used for the prediction.
-    fprintf('\tdepending on:\n');
-    for monitor = monitors
-        fprintf('\t\t%s\n', monitor.Label);
-    end
-    fprintf('\tSuccess rate: %0.3f\n', successRate);
-end
-
-function calculateKNNSuccessRate(monitor, monitors, data, classes)
+function calculateKNNSuccessRate(neighborCnt, data, dLabels, classes, clsLabel)
 % CALCULATEKNNSUCCESSRATE tests the classification using k-nearest
 % neighbors method. There are created monitors for attributes used as the
 % input for the classification model and a monitor for the attribute that
 % is classified. The model is trained on a portion of data from the
 % simulation and than tested on the rest of the data. The rate of the
 % classification success of the model is printed.
-    neighborCnt = 5; % 5 neighbors
-    knnc = KNNClassification(neighborCnt);
+    knnc = KNNClassification();
     
-    knncSuccessRate = knnc.learnAndTest(data, classes);
-    fprintf('%d-nearest neighbors classification for %s\n', neighborCnt, monitor.Label);
-    printSuccessRate(knncSuccessRate, monitors);
-    
-    % 20 neighbors
-    neighborCnt = 20;
-    knnc = KNNClassification(neighborCnt);
-    
-    knncSuccessRate = knnc.learnAndTest(data, classes);
-    fprintf('%d-nearest neighbors classification for %s\n', neighborCnt, monitor.Label);
-    printSuccessRate(knncSuccessRate, monitors);
+    knncSuccessRate = knnc.learnAndTest(data, classes, neighborCnt);
+    fprintf('%d-nearest neighbors classification for %s\n', neighborCnt, clsLabel);
+    printSuccessRate(knncSuccessRate, dLabels);
+end
+
+function printSuccessRate(successRate, dLabels)
+% PRINTREGTREESUCCESSRATE prints the result of the classification that used the
+% regression tree method.
+%  successRate - represents the success rate of the classicication test.
+%  targetMonitor - is the monitor of the classified attribute.
+%  monitors - is an array of monitors of the attributes used for the prediction.
+    fprintf('\tdepending on:\n');
+    for label = dLabels
+        fprintf('\t\t%s\n', label{1});
+    end
+    fprintf('\tSuccess rate: %0.3f\n', successRate);
+end
+
+function saveData(data, dLabels, classes, clsLabel)
+% SAVEDATA saves the given data and their classes into a file
+% "simulationData.mat. The given labels of the data are saved as well.
+    save('simulationData.mat', 'data', 'dLabels', 'classes', 'clsLabel');
 end
 
 function calculateProximityDependency(components)
