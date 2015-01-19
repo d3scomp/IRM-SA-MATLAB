@@ -22,12 +22,15 @@ function heatMap = generateHeatMap
 	diskMap = imfilter(map, diskFilter); % Blur the heat spots
 
 	motionFilter = fspecial('motion', motionLen, motionTheta);
-	heatMap = imfilter(diskMap, motionFilter, 'replicate'); % Blur the map again
+	motionMap = imfilter(diskMap, motionFilter, 'replicate'); % Blur the map again
+    
+    avgFilter = fspecial('average', 100);
+    heatMap = imfilter(motionMap, avgFilter);
 
-	% figure
-	% colormap('hot');
-	% imagesc(heatMap);
-	% colorbar;
-	% title('Heat Map');
+% 	figure;
+% 	colormap('hot');
+% 	imagesc(heatMap);
+% 	colorbar;
+% 	title('Heat Map');
 
 end

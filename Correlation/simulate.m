@@ -1,4 +1,4 @@
-function simulate()
+function simulate() % TODO: varargin pairs name-value specifying the simulation attributes
 % SIMULATE runs the simulation of firefighters moving on the heat map.
 % At first there is a heat map being generated. Than there are created 4 firefighter
 % components and theirs processes. There are planned movements of these components.
@@ -8,7 +8,7 @@ function simulate()
     randomMovement = true; % Switch between random and predefined movement.
     animate = true; % Indicates whether the simulation will be animated.
     plotSimData = true; % Indicates whether the data from the simulation will be plotted.
-    maxSteps = 10000; % The number of steps in the simulation. After the given number of steps the simulation ends.
+    maxSteps = 100000; % The number of steps in the simulation. After the given number of steps the simulation ends.
     
     % Configure the simulation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
@@ -168,34 +168,40 @@ function simulate()
     end
     
     % Evaluate
+    [monitor, monitors, data, classes] = prepareTestData(f);
 %    calculateCorrelation(f);
 %    calculateProximityDependency(f);
-    calculateKNNSuccessRate(f);
-    calculateRegTreeSuccessRate(f);
+    calculateKNNSuccessRate(monitor, monitors, data, classes);
+    calculateRegTreeSuccessRate(monitor, monitors, data, classes);
 end
 
-function calculateRegTreeSuccessRate(components)
+function [targetMonitor, monitors, data, classes] = prepareTestData(components)
+    targetMonitor = TemperatureMonitor(20);
+    monitors = [PositionMonitor(5) OxygenMonitor(1) BatteryMonitor(1)];
+    
+    [data, classes] = targetMonitor.learningData(components, monitors);
+end
+
+function calculateRegTreeSuccessRate(monitor, monitors, data, classes)
 % CALCULATEREGTREESUCCESSRATE tests the classification using regression
 % tree method. There are created monitors for attributes used as the
 % input for the classification model and a monitor for the attribute that
 % is classified. The model is trained on a portion of data from the
 % simulation and than tested on the rest of the data. The rate of the
 % classification success of the model is printed.
-    targetMonitor = TemperatureMonitor(20);
-    monitors = [PositionMonitor(5) OxygenMonitor(1) BatteryMonitor(1)];
     regTree = RegTreeClassification();
     
-    regTreeSuccessRate = regTree.learnAndTest(components, monitors, targetMonitor);
-    printRegTreeSuccessRate(regTreeSuccessRate, targetMonitor, monitors);
+    regTreeSuccessRate = regTree.learnAndTest(data, classes);
+    fprintf('Regression tree classification for %s\n', monitor.Label);
+    printSuccessRate(regTreeSuccessRate, monitors);
 end
 
-function printRegTreeSuccessRate(successRate, targetMonitor, monitors)
+function printSuccessRate(successRate, monitors)
 % PRINTREGTREESUCCESSRATE prints the result of the classification that used the
 % regression tree method.
 %  successRate - represents the success rate of the classicication test.
 %  targetMonitor - is the monitor of the classified attribute.
 %  monitors - is an array of monitors of the attributes used for the prediction.
-    fprintf('Regression tree classification for %s\n', targetMonitor.Label);
     fprintf('\tdepending on:\n');
     for monitor = monitors
         fprintf('\t\t%s\n', monitor.Label);
@@ -203,7 +209,7 @@ function printRegTreeSuccessRate(successRate, targetMonitor, monitors)
     fprintf('\tSuccess rate: %0.3f\n', successRate);
 end
 
-function calculateKNNSuccessRate(components)
+function calculateKNNSuccessRate(monitor, monitors, data, classes)
 % CALCULATEKNNSUCCESSRATE tests the classification using k-nearest
 % neighbors method. There are created monitors for attributes used as the
 % input for the classification model and a monitor for the attribute that
@@ -211,36 +217,19 @@ function calculateKNNSuccessRate(components)
 % simulation and than tested on the rest of the data. The rate of the
 % classification success of the model is printed.
     neighborCnt = 5; % 5 neighbors
-    monitors = [PositionMonitor(5) OxygenMonitor(1)];
-    targetMonitor = TemperatureMonitor(20);
     knnc = KNNClassification(neighborCnt);
     
-    knncSuccessRate = knnc.learnAndTest(components, monitors, targetMonitor);
-    printKNNSuccessRate(knncSuccessRate, targetMonitor, monitors, neighborCnt);
+    knncSuccessRate = knnc.learnAndTest(data, classes);
+    fprintf('%d-nearest neighbors classification for %s\n', neighborCnt, monitor.Label);
+    printSuccessRate(knncSuccessRate, monitors);
     
     % 20 neighbors
     neighborCnt = 20;
-    monitors = [monitors BatteryMonitor(1)];
     knnc = KNNClassification(neighborCnt);
     
-    knncSuccessRate = knnc.learnAndTest(components, monitors, targetMonitor);
-    printKNNSuccessRate(knncSuccessRate, targetMonitor, monitors, neighborCnt);
-end
-
-function printKNNSuccessRate(successRate, targetMonitor, monitors, neighborCnt)
-% PRINTKNNSUCCESSRATE prints the result of the classification that used the
-% k-nearest neighbors method.
-%  successRate - represents the success rate of the classicication test.
-%  targetMonitor - is the monitor of the classified attribute.
-%  monitors - is an array of monitors of the attributes used for the prediction.
-%  meighborCnt - is the number of neighbors used for the class prediction.
-    fprintf('%d-nearest neighbors classification for %s\n', neighborCnt, ...
-        targetMonitor.Label);
-    fprintf('\tdepending on:\n');
-    for monitor = monitors
-        fprintf('\t\t%s\n', monitor.Label);
-    end
-    fprintf('\tSuccess rate: %0.3f\n', successRate);
+    knncSuccessRate = knnc.learnAndTest(data, classes);
+    fprintf('%d-nearest neighbors classification for %s\n', neighborCnt, monitor.Label);
+    printSuccessRate(knncSuccessRate, monitors);
 end
 
 function calculateProximityDependency(components)

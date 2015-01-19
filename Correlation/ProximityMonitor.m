@@ -4,6 +4,10 @@ classdef (Abstract = true) ProximityMonitor < matlab.mixin.Heterogeneous
 	% based on the specified boundary. The ProximityMonitor class needs to be
 	% extended in order to define a metric for specific values.
 	
+    properties (Constant)
+        plotClasses = true; % Indicates whether the classes of data will be plotted.
+    end
+    
     properties (SetAccess = protected)
         Label; % A label that identifies the data for inherited Monitor class.
         Boundary; % The boundary for the metric that delimits the notion of "close" and "far".
@@ -138,6 +142,85 @@ classdef (Abstract = true) ProximityMonitor < matlab.mixin.Heterogeneous
             closeStd = std(closeValues);
             farMean = mean(farValues);
             farStd = std(farValues);
+        end
+    end
+    
+    methods (Sealed = true)
+        function [data, classes] = learningData(obj, components, monitors)
+        % LEARNINGDATA prepares the data for training a model for data classification.
+        %  The input arguments are:
+        %   components - All the components from which data will be
+        %                extracted and transformed.
+        %   monitors - Monitors that will be used to compute distances
+        %              between the data of the given components.
+        %  Computed distances of the components data are returned in "data"
+        %  return value.
+        %  The monitor on which is this function called will classify the
+        %  associated data and return the classes in the "classes" return
+        %  value.
+            fprintf('Preparing data...\n');
+            data = [];
+            classes = [];
+            componentsCnt = size(components,2);
+            dataEnd = intmax;
+            
+            % Find the shortest data vector among all the data vectors in the components and remember its length 
+            for i = 1:componentsCnt
+                c1 = components(i);
+                dataEnd = min(dataEnd, c1.getMinDataFieldLength());
+            end
+            
+            % Gather the vector of classified data among all the pairs of components
+            for i = 1:componentsCnt % Do the computation for all the pairs of components - Component 1
+                    c1 = components(i);
+                    for j = (i+1):componentsCnt % Do the computation for all the pairs of components - Component 2
+                        c2 = components(j);
+                        classificationData = obj.classify(c1, c2);
+                        classes = [classes, classificationData(1:dataEnd)];
+                    end
+            end
+            
+            % Prepare the input for each monitor among all the pairs of components
+            for mIndex = 1:size(monitors, 2) % For each monitor prepare one input data "attribute" values
+                monitor = monitors(mIndex);
+                monitorData = [];
+                for i = 1:componentsCnt % Do the computation for all the pairs of components - Component 1
+                    c1 = components(i);
+                    for j = (i+1):componentsCnt % Do the computation for all the pairs of components - Component 2
+                        c2 = components(j);
+                        distances = monitor.distances(c1, c2);
+                        monitorData = [monitorData, distances(1:dataEnd)];
+                    end
+                end
+                data = [data; monitorData];
+            end
+            
+            if obj.plotClasses
+                dataHits = [];
+                dataMisses = [];
+                % Separate the data for the visualization in a plot
+                for i = 1:size(classes, 2)
+                    if classes(i)
+                        dataHits = [dataHits, data(:,i)];
+                    else
+                        dataMisses = [dataMisses, data(:,i)];
+                    end
+                end
+
+                fprintf('Data dimensions (hits): [%d:%d]\n', size(dataHits, 1), size(dataHits, 2));
+                fprintf('Data dimensions (misses): [%d:%d]\n', size(dataMisses, 1), size(dataMisses, 2));
+                % Plot the class distribution depending on the first two attributes
+                figure('Name', 'Data classes');
+                hold on;
+                title(sprintf('%s - %s', monitors(1).Label, monitors(2).Label));
+                plot(dataHits(1,:), dataHits(2,:), 'rx', dataMisses(1,:), dataMisses(2,:), 'bo');
+                hold off;
+                % Plot the class distribution depending on the first three attributes
+%                scatter3(trainDataHits(1,:), trainDataHits(2,:), trainDataHits(3,:));
+%                scatter3(trainDataMisses(1,:), trainDataMisses(2,:), trainDataMisses(3,:));
+            end
+            fprintf('Data prepared\n');
+            data = transpose(data);
         end
     end
     

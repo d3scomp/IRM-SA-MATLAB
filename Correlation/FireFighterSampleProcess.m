@@ -28,10 +28,10 @@ classdef FireFighterSampleProcess < Process
             
             oxygenMultiplier = 1;
             if obj.Component.PositionX ~= obj.Component.FutureX
-                oxygenMultiplier = oxygenMultiplier + 50;
+                oxygenMultiplier = oxygenMultiplier + 1;
             end
             if obj.Component.PositionY ~= obj.Component.FutureY
-                oxygenMultiplier = oxygenMultiplier + 50;
+                oxygenMultiplier = oxygenMultiplier + 1;
             end
             obj.Component.OxygenLevel = ...
                 obj.Component.OxygenLevel ...
