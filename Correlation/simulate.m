@@ -8,7 +8,7 @@ function simulate() % TODO: varargin pairs name-value specifying the simulation 
     randomMovement = true; % Switch between random and predefined movement.
     animate = false; % Indicates whether the simulation will be animated.
     plotSimData = false; % Indicates whether the data from the simulation will be plotted.
-    maxSteps = 1000000; % The number of steps in the simulation. After the given number of steps the simulation ends.
+    maxSteps = 100000; % The number of steps in the simulation. After the given number of steps the simulation ends.
     
     % Configure the simulation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
@@ -167,27 +167,33 @@ function simulate() % TODO: varargin pairs name-value specifying the simulation 
         plotData(f);
     end
     
-    % Evaluate
-    [data, dLabels, classes, clsLabel] = prepareTestData(f);
+    % Evaluate    
+    for i = 1:50
+        dataFile = sprintf('simulationData%ddeg.mat', i);
+        prepareTestData(f, i, dataFile);
+    end
+    
+%    dataFile = 'simulationData20deg.mat';
+%    [data, dLabels, classes, clsLabel] = prepareTestData(f, 20, dataFile);
 %    calculateCorrelation(f);
 %    calculateProximityDependency(f);
-    calculateKNNSuccessRate(20, data, dLabels, classes, clsLabel);
-    calculateRegTreeSuccessRate(data, dLabels, classes, clsLabel);
+%    calculateKNNSuccessRate(20, data, dLabels, classes, clsLabel);
+%    calculateRegTreeSuccessRate(data, dLabels, classes, clsLabel);
 end
 
-function [data, dLabels, classes, clsLabel] = prepareTestData(components)
+function [data, dLabels, classes, clsLabel] = prepareTestData(components, temperatureBound, dataFile)
 % Calculate differences of the data from components using apropriate
 % monitors. Classify the desired data using an appropriate monitor.
 % The distances are calculated using PositionMonitor, OxygenMonitor and
 % BatteryMonitor. The classification is done using TemperatureMonitor.
 % The calculated data are stored into a file for a later usage.
-    targetMonitor = TemperatureMonitor(20);
+    targetMonitor = TemperatureMonitor(temperatureBound);
     monitors = [PositionMonitor(5) OxygenMonitor(1) BatteryMonitor(1)];
     dLabels = {'position', 'oxygen', 'battery'};
     clsLabel = 'temperature';
     
     [data, classes] = targetMonitor.learningData(components, monitors);
-    saveData(data, dLabels, classes, clsLabel);
+    saveData(data, dLabels, classes, clsLabel, dataFile);
 end
 
 function calculateRegTreeSuccessRate(data, dLabels, classes, clsLabel)
@@ -231,10 +237,10 @@ function printSuccessRate(successRate, dLabels)
     fprintf('\tSuccess rate: %0.3f\n', successRate);
 end
 
-function saveData(data, dLabels, classes, clsLabel)
+function saveData(data, dLabels, classes, clsLabel, dataFile)
 % SAVEDATA saves the given data and their classes into a file
 % "simulationData.mat. The given labels of the data are saved as well.
-    save('simulationData.mat', 'data', 'dLabels', 'classes', 'clsLabel');
+    save(dataFile, 'data', 'dLabels', 'classes', 'clsLabel');
 end
 
 function calculateProximityDependency(components)
