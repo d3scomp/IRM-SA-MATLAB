@@ -1,43 +1,54 @@
-function precisionOfModels(data, classes)
+function precisionOfModels(allData, allClasses)
 %PRECISIONOFMODELS trains the models on the portions of the given data. The
 %portion is increasing for each model. There is a plot created that
 %illustrates the accuracy of the models based on the number of samples.
 
 knnc = KNNClassification();
-rtc = RegTreeClassification();
 
+sampleLengths = generateSampleLengths(size(allClasses, 1));
 
-sampleLengths = [1000 5000 10000 50000 100000];
-knnVariants = [5 20 100];
-successRates = zeros(size(sampleLengths, 2), size(knnVariants, 2) + 1);
-plotLegends = {'Regression Tree', '5-nearest neighbors', '20-nearest neighbors', '100-nearest neighbors'};
+plotRates = zeros(size(sampleLengths, 2), size(allData, 3));
 
-permutation = randperm(size(data, 1));
-shuffData = data(permutation,:);
-shuffClasses = classes(permutation);
-
-for i = 1:size(sampleLengths, 2)
-    sampleLength = sampleLengths(i);
-    subData = shuffData(1:sampleLength,:);
-    subClasses = shuffClasses(1:sampleLength);
-    fprintf('Sample length: %d\n', sampleLength);
+for r = 1:size(allData, 3)
+%    load(sprintf('simulationData_run%d.mat', r));
+    data = allData(:,:,r);
+    classes = transpose(allClasses(:,r));
+    fprintf('Data length: %d\n', size(classes, 1));
     
-    successRates(i, 1) = rtc.learnAndTest(subData, subClasses);
-    fprintf('Success rate: %0.3f\n', successRates(i, 1));
-    
-    for j = 1:size(knnVariants, 2);
-        successRates(i, j+1) = knnc.learnAndTest(subData, subClasses, knnVariants(j));
-        fprintf('Success rate: %0.3f\n', successRates(i, j+1));
+    testData = data(floor(size(data, 1)/2):size(data, 1),:);
+    testCls = classes(floor(size(classes, 2)/2):size(classes, 2));
+    fprintf('Test data length: %d\n', size(testCls, 1));
+
+    for i = 1:size(sampleLengths, 2)
+        sampleLength = sampleLengths(i);
+        trainData = data(1:sampleLength,:);
+        trainCls = classes(1:sampleLength);
+        fprintf('Train data length: %d\n', sampleLength);
+        
+        plotRates(i, r) = knnc.learnAndTest(trainData, trainCls, ...
+            testData, testCls, 20);
+        fprintf('Success rate: %0.3f\n', plotRates(i, r));
     end
 end
 
-figure('Name', 'Success rate');
-hold all;
-for i = 1:(size(knnVariants, 2)+1)
-    plot(sampleLengths, successRates(:,i));
-end
-legend(plotLegends);
-hold off;
+% save('plotData.mat', 'plotRates', 'sampleLengths');
+
+figure('Name', 'Variants');
+boxplot(transpose(plotRates)*100, 'labels', sampleLengths);
+xlabel('Number of Training Samples');
+ylabel('Prediction Accuracy (%)');
 
 end
 
+function sampleLengths = generateSampleLengths(maxSampleCnt)
+% GENERATESAMPLELENGTHS prepares an array containing "logaritmic" scale of
+% sample lengths on which prediction models will be sequentially trained.
+    scale = [100 200 500];
+    scaleEnd = size(scale, 2);
+    sampleLengths = [50];
+    
+    while scale(scaleEnd) < maxSampleCnt
+        sampleLengths = [sampleLengths scale];
+        scale = scale * 10; % Shift the scale by an order of magnitude
+    end
+end

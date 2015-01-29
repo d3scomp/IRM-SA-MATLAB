@@ -29,8 +29,8 @@ classdef FireFighterGroupRandomMoveProcess < Process
             
             obj.GroupComponents =  compGroup;
             obj.GroupBound = groupBound;
-            obj.OriginX = component.PositionX;
-            obj.OriginY = component.PositionY;
+            obj.OriginX = 256;
+            obj.OriginY = 256;
             obj.DestinationX = component.PositionX;
             obj.DestinationY = component.PositionY;
             obj.BoundX = boundX;

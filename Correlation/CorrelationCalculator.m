@@ -1,5 +1,7 @@
 classdef CorrelationCalculator
-    
+% CORRELATIONCALCULATOR provides methods to calculate correlation 
+% between given sets of data.
+
     properties(Access = private, Constant = true)
         SegmentLength = 50; % The number of elements in each segment that is used for the correlation computation.
     end
@@ -131,43 +133,3 @@ classdef CorrelationCalculator
     end
 	
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

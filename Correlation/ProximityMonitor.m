@@ -4,10 +4,6 @@ classdef (Abstract = true) ProximityMonitor < matlab.mixin.Heterogeneous
 	% based on the specified boundary. The ProximityMonitor class needs to be
 	% extended in order to define a metric for specific values.
 	
-    properties (Constant)
-        plotClasses = false; % Indicates whether the classes of data will be plotted.
-    end
-    
     properties (SetAccess = protected)
         Label; % A label that identifies the data for inherited Monitor class.
         Boundary; % The boundary for the metric that delimits the notion of "close" and "far".
@@ -160,7 +156,6 @@ classdef (Abstract = true) ProximityMonitor < matlab.mixin.Heterogeneous
         %  value.
             fprintf('Preparing data...\n');
             data = [];
-            classes = [];
             componentsCnt = size(components,2);
             dataEnd = intmax;
             
@@ -170,14 +165,23 @@ classdef (Abstract = true) ProximityMonitor < matlab.mixin.Heterogeneous
                 dataEnd = min(dataEnd, c1.getMinDataFieldLength());
             end
             
+            subClasses = [];
             % Gather the vector of classified data among all the pairs of components
             for i = 1:componentsCnt % Do the computation for all the pairs of components - Component 1
                     c1 = components(i);
                     for j = (i+1):componentsCnt % Do the computation for all the pairs of components - Component 2
                         c2 = components(j);
                         classificationData = obj.classify(c1, c2);
-                        classes = [classes, classificationData(1:dataEnd)];
+                        subClasses = [subClasses; classificationData(1:dataEnd)];
                     end
+            end
+            subClassesHeight = size(subClasses, 1);
+            subClassesSize = subClassesHeight*size(subClasses, 2);
+            classes = zeros(1, subClassesSize);
+            for i = 1:size(subClasses, 1)
+                % Interleave the classes of distance of different pairs of
+                % components to keep them sorted by time they were sampled in.
+                classes(i:subClassesHeight:subClassesSize) = subClasses(i,:);
             end
             
             % Prepare the input for each monitor among all the pairs of components
@@ -189,36 +193,20 @@ classdef (Abstract = true) ProximityMonitor < matlab.mixin.Heterogeneous
                     for j = (i+1):componentsCnt % Do the computation for all the pairs of components - Component 2
                         c2 = components(j);
                         distances = monitor.distances(c1, c2);
-                        monitorData = [monitorData, distances(1:dataEnd)];
+                        monitorData = [monitorData; distances(1:dataEnd)];
                     end
                 end
-                data = [data; monitorData];
+                mergedDataHeight = size(monitorData, 1);
+                mergedDataSize = mergedDataHeight*size(monitorData, 2);
+                mergedData = zeros(1, mergedDataSize);
+                for i = 1:size(monitorData, 1)
+                    % Interleave the distance data of different pairs of
+                    % components to keep them sorted by time they were sampled in.
+                    mergedData(i:mergedDataHeight:mergedDataSize) = monitorData(i,:);
+                end
+                data = [data; mergedData];
             end
             
-            if obj.plotClasses
-                dataHits = [];
-                dataMisses = [];
-                % Separate the data for the visualization in a plot
-                for i = 1:size(classes, 2)
-                    if classes(i)
-                        dataHits = [dataHits, data(:,i)];
-                    else
-                        dataMisses = [dataMisses, data(:,i)];
-                    end
-                end
-
-                fprintf('Data dimensions (hits): [%d:%d]\n', size(dataHits, 1), size(dataHits, 2));
-                fprintf('Data dimensions (misses): [%d:%d]\n', size(dataMisses, 1), size(dataMisses, 2));
-                % Plot the class distribution depending on the first two attributes
-                figure('Name', 'Data classes');
-                hold on;
-                title(sprintf('%s - %s', monitors(1).Label, monitors(2).Label));
-                plot(dataHits(1,:), dataHits(2,:), 'rx', dataMisses(1,:), dataMisses(2,:), 'bo');
-                hold off;
-                % Plot the class distribution depending on the first three attributes
-%                scatter3(trainDataHits(1,:), trainDataHits(2,:), trainDataHits(3,:));
-%                scatter3(trainDataMisses(1,:), trainDataMisses(2,:), trainDataMisses(3,:));
-            end
             fprintf('Data prepared\n');
             data = transpose(data);
         end

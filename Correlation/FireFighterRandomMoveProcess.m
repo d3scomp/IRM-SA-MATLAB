@@ -24,8 +24,8 @@ classdef FireFighterRandomMoveProcess < Process
 		% The given period will be stored into the process.
             obj@Process(component, period); % Invoke the constructor of the superclass
             
-            obj.OriginX = component.PositionX;
-            obj.OriginY = component.PositionY;
+            obj.OriginX = 256;
+            obj.OriginY = 256;
             obj.DestinationX = component.PositionX;
             obj.DestinationY = component.PositionY;
             obj.BoundX = boundX;

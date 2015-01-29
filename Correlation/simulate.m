@@ -1,99 +1,73 @@
-function simulate() % TODO: varargin pairs name-value specifying the simulation attributes
+function simulate()
 % SIMULATE runs the simulation of firefighters moving on the heat map.
 % At first there is a heat map being generated. Than there are created 4 firefighter
 % components and theirs processes. There are planned movements of these components.
 % After this preparation the simulation calendar is initialized with the starting
 % events and the simulation runs until maximum of simulation steps is reached.
 
-    randomMovement = true; % Switch between random and predefined movement.
     animate = false; % Indicates whether the simulation will be animated.
     plotSimData = false; % Indicates whether the data from the simulation will be plotted.
-    maxSteps = 100000; % The number of steps in the simulation. After the given number of steps the simulation ends.
+    % The two options above change to true only if the runNum below is set to 1
+    % (otherwise you will get a lot of plots :) )
+    maxSteps = 10000; % The number of steps in the simulation. After the given number of steps the simulation ends.
+    runNum = 50; % The number of simulation repetitions.
     
     % Configure the simulation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    rng(12345); % Seed the random number generator
-    
-	% Create the firefighter components
-    startX = 256;
-    startY = 256;
-    f1 = FireFighter('f1', startX, startY);
-    f2 = FireFighter('f2', startX, startY);
-    f3 = FireFighter('f3', startX, startY);
-    f4 = FireFighter('f4', startX, startY);
+        
+    moveProcessPeriod = 1;
+    sampleProcessPeriod = 0.5;
     
 	% Generate heat map
     map = generateHeatMap();
     
+    rng(12345); % Seed the random number generator
+
+    allData = []; % Collect all the data into this variable
+    allClasses = []; % Collect all the classes into this variable
+    
+for r = 1:runNum
+    fprintf('Run %d\n', r);
+    
+	% Create the firefighter components
+    startX = floor(rand*500 + 6);
+    startY = floor(rand*500 + 6);
+    f1 = FireFighter('f1', startX, startY, maxSteps);
+    f2 = FireFighter('f2', startX, startY, maxSteps);
+    f3 = FireFighter('f3', startX, startY, maxSteps);
+    f4 = FireFighter('f4', startX, startY, maxSteps);
+    
     % Create an instance of the calendar for simulation
     calendar = EventCalendar();
+        
+    % Random movement simulation initializations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        
+    xBound = 250;
+    yBound = 250;
+    g1Bound = 3;
+    g2Bound = g1Bound - 1;
+
+    % The firefighter f1 will start moving towards d1 in the time 1
+    f1Move = FireFighterGroupRandomMoveProcess(f1, [f2], moveProcessPeriod, ...
+        map, g1Bound, xBound, yBound);
+    f1MoveEvent = Event(f1Move, 1);
+    calendar.insert(f1MoveEvent);
+
+    % The firefighter f2 will start moving towards d1 in the time 5
+    f2Move = FireFighterGroupRandomMoveProcess(f2, [f1], moveProcessPeriod, ...
+        map, g2Bound, xBound, yBound);
+    f2MoveEvent = Event(f2Move, 1);
+    calendar.insert(f2MoveEvent);
+
+    % The firefighter f3 will start moving towards d1 in the time 350
+    f3Move = FireFighterRandomMoveProcess(f3, moveProcessPeriod, map, xBound, yBound);
+    f3MoveEvent = Event(f3Move, 1);
+    calendar.insert(f3MoveEvent);
+
+    % The firefighter f4 will start moving towards d2 in the time 10
+    f4Move = FireFighterRandomMoveProcess(f4, moveProcessPeriod, map, xBound, yBound);
+    f4MoveEvent = Event(f4Move, 1);
+    calendar.insert(f4MoveEvent);
     
-    moveProcessPeriod = 1;
-    sampleProcessPeriod = 0.5;
-        
-    if ~randomMovement % Predefined movement simulation %%%%%%%%%%%%%%%%%%%%%%%
-        % Create destination points for the firefighters
-        d1 = [250, 250];
-        d2 = [300, 300];
-
-        % The firefighter f1 will start moving towards d1 in the time 1
-        f1Move = FireFighterMoveProcess(f1, moveProcessPeriod, map, d1);
-        f1MoveEvent = Event(f1Move, 1);
-        calendar.insert(f1MoveEvent);
-
-        % The firefighter f1 will start moving towards d2 in the time 350
-        f1Move = FireFighterMoveProcess(f1, moveProcessPeriod, map, d2);
-        f1MoveEvent = Event(f1Move, 350);
-        calendar.insert(f1MoveEvent);
-
-        % The firefighter f2 will start moving towards d1 in the time 5
-        f2Move = FireFighterMoveProcess(f2, moveProcessPeriod, map, d1);
-        f2MoveEvent = Event(f2Move, 5);
-        calendar.insert(f2MoveEvent);
-
-        % The firefighter f3 will start moving towards d2 in the time 10
-        f3Move = FireFighterMoveProcess(f3, moveProcessPeriod, map, d2);
-        f3MoveEvent = Event(f3Move, 10);
-        calendar.insert(f3MoveEvent);
-
-        % The firefighter f3 will start moving towards d1 in the time 350
-        f3Move = FireFighterMoveProcess(f3, moveProcessPeriod, map, d1);
-        f3MoveEvent = Event(f3Move, 350);
-        calendar.insert(f3MoveEvent);
-
-        % The firefighter f4 will start moving towards d2 in the time 10
-        f4Move = FireFighterMoveProcess(f4, moveProcessPeriod, map, d2);
-        f4MoveEvent = Event(f4Move, 10);
-        calendar.insert(f4MoveEvent);
-    else % Random movement simulation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        
-        xBound = 250;
-        yBound = 250;
-        g1Bound = 3;
-        g2Bound = g1Bound - 1;
-        
-        % The firefighter f1 will start moving towards d1 in the time 1
-        f1Move = FireFighterGroupRandomMoveProcess(f1, [f2], moveProcessPeriod, ...
-            map, g1Bound, xBound, yBound);
-        f1MoveEvent = Event(f1Move, 1);
-        calendar.insert(f1MoveEvent);
-
-        % The firefighter f2 will start moving towards d1 in the time 5
-        f2Move = FireFighterGroupRandomMoveProcess(f2, [f1], moveProcessPeriod, ...
-            map, g2Bound, xBound, yBound);
-        f2MoveEvent = Event(f2Move, 1);
-        calendar.insert(f2MoveEvent);
-
-        % The firefighter f3 will start moving towards d1 in the time 350
-        f3Move = FireFighterRandomMoveProcess(f3, moveProcessPeriod, map, xBound, yBound);
-        f3MoveEvent = Event(f3Move, 1);
-        calendar.insert(f3MoveEvent);
-
-        % The firefighter f4 will start moving towards d2 in the time 10
-        f4Move = FireFighterRandomMoveProcess(f4, moveProcessPeriod, map, xBound, yBound);
-        f4MoveEvent = Event(f4Move, 1);
-        calendar.insert(f4MoveEvent);
-    end
     
     % Sample processes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
@@ -167,21 +141,27 @@ function simulate() % TODO: varargin pairs name-value specifying the simulation 
         plotData(f);
     end
     
-    % Evaluate    
-    for i = 1:50
-        dataFile = sprintf('simulationData%ddeg.mat', i);
-        prepareTestData(f, i, dataFile);
-    end
+    % Evaluate
     
-%    dataFile = 'simulationData20deg.mat';
-%    [data, dLabels, classes, clsLabel] = prepareTestData(f, 20, dataFile);
+    % Prepare data
+    [data, dLabels, classes, clsLabel] = prepareTestData(f, 20);
+    allData(:,:,r) = data;
+    allClasses(:,r) = classes;
+%    dataFile = sprintf('simulationData_run%d.mat', r);
+%    save(dataFile, 'data', 'dLabels', 'classes', 'clsLabel');
+end % for r
+
+precisionOfModels(allData, allClasses);
+
+% These statistics below was not used in the end
 %    calculateCorrelation(f);
 %    calculateProximityDependency(f);
 %    calculateKNNSuccessRate(20, data, dLabels, classes, clsLabel);
 %    calculateRegTreeSuccessRate(data, dLabels, classes, clsLabel);
+
 end
 
-function [data, dLabels, classes, clsLabel] = prepareTestData(components, temperatureBound, dataFile)
+function [data, dLabels, classes, clsLabel] = prepareTestData(components, temperatureBound)
 % Calculate differences of the data from components using apropriate
 % monitors. Classify the desired data using an appropriate monitor.
 % The distances are calculated using PositionMonitor, OxygenMonitor and
@@ -193,7 +173,6 @@ function [data, dLabels, classes, clsLabel] = prepareTestData(components, temper
     clsLabel = 'temperature';
     
     [data, classes] = targetMonitor.learningData(components, monitors);
-    saveData(data, dLabels, classes, clsLabel, dataFile);
 end
 
 function calculateRegTreeSuccessRate(data, dLabels, classes, clsLabel)
@@ -235,12 +214,6 @@ function printSuccessRate(successRate, dLabels)
         fprintf('\t\t%s\n', label{1});
     end
     fprintf('\tSuccess rate: %0.3f\n', successRate);
-end
-
-function saveData(data, dLabels, classes, clsLabel, dataFile)
-% SAVEDATA saves the given data and their classes into a file
-% "simulationData.mat. The given labels of the data are saved as well.
-    save(dataFile, 'data', 'dLabels', 'classes', 'clsLabel');
 end
 
 function calculateProximityDependency(components)

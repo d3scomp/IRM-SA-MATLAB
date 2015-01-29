@@ -22,12 +22,12 @@ classdef FireFighter < Component
     end
     
     methods
-        function obj = FireFighter(name, positionX, positionY)
+        function obj = FireFighter(name, positionX, positionY, maxSteps)
             % Constructs new instance of the FireFighter class. Sets the
             % starting position, oxygen level and battery level to the
             % object. Initializes all the noise filters with a predefined
             % noise level.
-            obj = obj@Component(name); % Invoke the constructor of the super class
+            obj = obj@Component(name, maxSteps); % Invoke the constructor of the super class
             
             obj.PositionNoise = RandomNoise(2);
             obj.TemperatureNoise = RandomNoise(3);

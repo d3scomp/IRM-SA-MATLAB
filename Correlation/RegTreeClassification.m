@@ -17,19 +17,14 @@ classdef RegTreeClassification
             obj.TrainPercentage = 0.5;
         end
         
-        function successRate = learnAndTest(obj, data, classes)
+        function successRate = learnAndTest(obj, trainData, trainCls, ...
+                testData, testCls)
         % LEARNANDTEST trains the model for the classification.
         % The regression tree model is trained on a portion of the given
         % data with corresponding classes. The portion is defined by
         % RegTreeClassification.TrainPercentage.
         % The rest of the data and classes is used to test the accuracy of
         % the predicition using the trained model.
-            trainEnd = floor(obj.TrainPercentage * size(data, 1));
-            testEnd = size(data, 1);
-            trainData = data(1:trainEnd,:);
-            testData = data(trainEnd:testEnd,:);
-            trainCls = classes(1:trainEnd);
-            testCls = classes(trainEnd:testEnd);
                         
             fprintf('Classifying using regression tree method ...\n');
             
